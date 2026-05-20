@@ -8,6 +8,7 @@ dependencies = [
     "cplex>=22.1.2.1",
     "docplex>=2.32.264",
     "matplotlib>=3.10.8",
+    "scipy>=1.16.2",
 ]
 
 [dependency-groups]

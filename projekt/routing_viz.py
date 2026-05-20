@@ -20,9 +20,15 @@ Example:
 
 from __future__ import annotations
 
+import argparse
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.patches import FancyBboxPatch
+from matplotlib.patches import FancyBboxPatchs
+
+try:
+    from . import ModelReader
+except ImportError:
+    import ModelReader
 
 # ---------------------------------------------------------------------------
 # flow-ID helpers
@@ -419,13 +425,52 @@ def visualize(
     return fig
 
 
+def visualize_file(
+    instance_path: str,
+    *,
+    save_path: str | None = None,
+    show: bool = True,
+):
+    """Load a JSON instance and visualize its routing tensor."""
+    instance = ModelReader.load_input_data(instance_path)
+    return visualize(instance.A, Cl=instance.Cl, save_path=save_path, show=show)
+
+
+def build_arg_parser():
+    """Create the CLI parser used by main()."""
+    parser = argparse.ArgumentParser(
+        description="Visualize the routing tensor from a JSON instance file.",
+        epilog="Example: uv run python projekt/routing_viz.py projekt/data/data1.json --save routing_data1.png",
+    )
+    parser.add_argument("instance_path", help="Path to the input JSON instance file.")
+    parser.add_argument(
+        "--save",
+        dest="save_path",
+        help="Optional path for the output image file.",
+    )
+    parser.add_argument(
+        "--no-show",
+        action="store_true",
+        help="Do not open the matplotlib window; useful when only saving.",
+    )
+    return parser
+
+
+def main(argv=None):
+    """CLI entrypoint: read an instance path and render the routing views."""
+    parser = build_arg_parser()
+    args = parser.parse_args(argv)
+    visualize_file(
+        args.instance_path,
+        save_path=args.save_path,
+        show=not args.no_show,
+    )
+    return 0
+
+
 # ---------------------------------------------------------------------------
 # demo — run this file directly to see the paper instance
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    # Uses the shared instance from network.py so the picture always matches
-    # whatever the solver is currently running on.
-    from network import a, Cl
-
-    visualize(a, Cl=Cl, save_path="routing_demo.png")
+    raise SystemExit(main())
